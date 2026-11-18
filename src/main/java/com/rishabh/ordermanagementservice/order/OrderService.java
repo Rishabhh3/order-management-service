@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -26,7 +27,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order placeOrder(PlaceOrderRequest request) {
+    public OrderResponse placeOrder(PlaceOrderRequest request) {
         String symbol = request.symbol().trim().toUpperCase();
 
         Instrument instrument = instrumentRepository.findBySymbol(symbol)
@@ -56,6 +57,36 @@ public class OrderService {
                 price
         );
 
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+
+        return new OrderResponse(
+                saved.getId(),
+                instrument.getSymbol(),
+                saved.getSide(),
+                saved.getQuantity(),
+                saved.getPrice(),
+                cost,
+                saved.getStatus()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> listByUser(Long userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(order -> {
+                    String symbol = instrumentRepository.findById(order.getInstrumentId())
+                            .map(Instrument::getSymbol)
+                            .orElse("UNKNOWN");
+                    return new OrderResponse(
+                            order.getId(),
+                            symbol,
+                            order.getSide(),
+                            order.getQuantity(),
+                            order.getPrice(),
+                            order.getPrice().multiply(BigDecimal.valueOf(order.getQuantity())),
+                            order.getStatus()
+                    );
+                })
+                .toList();
     }
 }
