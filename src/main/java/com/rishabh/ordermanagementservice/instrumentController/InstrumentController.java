@@ -2,6 +2,7 @@ package com.rishabh.ordermanagementservice.instrumentController;
 
 
 import com.rishabh.ordermanagementservice.instrument.Instrument;
+import com.rishabh.ordermanagementservice.instrument.InstrumentResponse;
 import com.rishabh.ordermanagementservice.instrument.InstrumentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +22,12 @@ public class InstrumentController {
     }
 
     @GetMapping
-    public List<Instrument> list(){
+    public List<InstrumentResponse> list(){
         return service.findAll();
     }
 
     @GetMapping("/{symbol}")
-    public Instrument get(@PathVariable String symbol){
+    public InstrumentResponse get(@PathVariable String symbol){
         return service.getBySymbol(symbol);
     }
 
