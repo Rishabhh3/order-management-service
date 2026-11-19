@@ -1,15 +1,13 @@
-package com.rishabh.ordermanagementservice.instrumentController;
+package com.rishabh.ordermanagementservice.instrument;
 
 
-import com.rishabh.ordermanagementservice.instrument.Instrument;
-import com.rishabh.ordermanagementservice.instrument.InstrumentResponse;
-import com.rishabh.ordermanagementservice.instrument.InstrumentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/instruments")
@@ -29,6 +27,11 @@ public class InstrumentController {
     @GetMapping("/{symbol}")
     public InstrumentResponse get(@PathVariable String symbol){
         return service.getBySymbol(symbol);
+    }
+
+    @GetMapping("/{symbol}/price")
+    public Map<String, Object>price(@PathVariable String symbol){
+        return service.getLivePrice(symbol);
     }
 
 }

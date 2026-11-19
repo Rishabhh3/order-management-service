@@ -1,7 +1,6 @@
 package com.rishabh.ordermanagementservice.order;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderResponse> listbyUser(@RequestParam Long userId){
+    public List<OrderResponse> listByUser(@RequestParam Long userId){
         return service.listByUser(userId);
     }
 }

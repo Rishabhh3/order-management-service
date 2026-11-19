@@ -6,6 +6,7 @@ import com.rishabh.ordermanagementservice.instrument.Instrument;
 import com.rishabh.ordermanagementservice.instrument.InstrumentRepository;
 import com.rishabh.ordermanagementservice.user.User;
 import com.rishabh.ordermanagementservice.user.UserRepository;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +19,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
+    private final StringRedisTemplate stringRedis;
 
-
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, InstrumentRepository instrumentRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, InstrumentRepository instrumentRepository, StringRedisTemplate stringRedis) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.instrumentRepository = instrumentRepository;
+        this.stringRedis = stringRedis;
     }
 
     @Transactional
@@ -36,7 +38,11 @@ public class OrderService {
         User user = userRepository.findById(request.user_id())
                 .orElseThrow(() -> new NotFoundException("No user with id: " + request.user_id()));
 
-        BigDecimal price = instrument.getLast_price();
+        String cached = stringRedis.opsForValue().get("price:" + symbol);
+        BigDecimal price = (cached != null)?
+                new BigDecimal(cached):
+                instrument.getLast_price();
+
         BigDecimal cost = price.multiply(BigDecimal.valueOf(request.quantity()));
 
         if (request.side() == Side.BUY) {
